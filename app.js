@@ -8,7 +8,9 @@ var cookieParser = require('cookie-parser');
 var cookieSession = require('cookie-session')
 var bodyParser = require('body-parser');
 var passport = require('passport');
-var TwitterStrategy = require('passport-twitter').Strategy
+var TwitterStrategy = require('passport-twitter').Strategy;
+var db =require('monk') (process.env.MONGOLAB_URI);
+var Users = db.get('Users');
 var routes = require('./routes/index');
 var users = require('./routes/users');
 
