@@ -26,8 +26,10 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
+app.use(passport.initialize());
+app.use(passport.session());
 app.use(express.static(path.join(__dirname, 'public')));
-
+app.use(passport.session());
 app.use(cookieSession({
   name: 'session',
   keys: ['key1', 'key2']
@@ -41,26 +43,25 @@ passport.deserializeUser(function(obj, done) {
   done(null, obj);
 });
 
+
 passport.use(new TwitterStrategy({
     consumerKey: process.env.TWITTER_CONSUMER_KEY,
     consumerSecret: process.env.TWITTER_CONSUMER_SECRET,
     callbackURL: process.env.HOST + "/auth/twitter/callback"
   },
   function(token, tokenSecret, profile, done) {
-    User.findOrCreate({ twitterId: profile.id }, function (err, user) {
-      return done(err, user);
-    });
-  }
+   done(null, { twitterId: profile.id })
+ }
 ));
 
 app.get('/auth/twitter',
   passport.authenticate('twitter'));
 
-app.get('/auth/twitter/callback',
-  passport.authenticate('twitter', { failureRedirect: '/login' }),
+app.get('/auth/twitter/callback', passport.authenticate('twitter', {
+  failureRedirect: '/login' }),
   function(req, res) {
     // Successful authentication, redirect home.
-    res.redirect('https://powerful-tor-9925.herokuapp.com/');
+    res.redirect('/');
   });
 
 app.use('/', routes);
@@ -96,6 +97,7 @@ app.use(function(err, req, res, next) {
     error: {}
   });
 });
+
 
 
 module.exports = app;
